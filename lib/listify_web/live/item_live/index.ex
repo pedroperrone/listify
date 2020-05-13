@@ -14,12 +14,6 @@ defmodule ListifyWeb.ItemLive.Index do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  defp apply_action(socket, :edit, %{"id" => id}) do
-    socket
-    |> assign(:page_title, "Edit Item")
-    |> assign(:item, Shopping.get_item!(id))
-  end
-
   defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, "New Item")
@@ -34,10 +28,15 @@ defmodule ListifyWeb.ItemLive.Index do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    item = Shopping.get_item!(id)
-    {:ok, _} = Shopping.delete_item(item)
-
-    {:noreply, assign(socket, :items, fetch_items())}
+    with {:ok, item = %Item{}} <- Shopping.get_item(id),
+         {:ok, item = %Item{}} <- Shopping.delete_item(item) do
+      {:noreply,
+       socket
+       |> assign(:items, fetch_items())
+       |> put_flash(:notice, "#{item.name} deleted")}
+    else
+      {:error, reason} -> {:noreply, put_flash(socket, :error, reason)}
+    end
   end
 
   defp fetch_items do
