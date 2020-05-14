@@ -1,5 +1,4 @@
 defmodule Listify.Shopping do
-  import Ecto.Query, warn: false
   alias Listify.Repo
 
   alias Listify.Shopping.Item

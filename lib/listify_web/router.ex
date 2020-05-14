@@ -19,7 +19,6 @@ defmodule ListifyWeb.Router do
 
     live "/", PageLive, :index
     live "/items", ItemLive.Index, :index
-    live "/items/new", ItemLive.Index, :new
   end
 
   # Other scopes may use custom stacks.

@@ -10,17 +10,17 @@ defmodule ListifyWeb.ItemLive.Index do
   end
 
   @impl true
-  def handle_params(params, _url, socket) do
-    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+  def handle_params(_params, _url, socket) do
+    {:noreply, apply_action(socket, socket.assigns.live_action)}
   end
 
-  defp apply_action(socket, :new, _params) do
+  defp apply_action(socket, :new) do
     socket
     |> assign(:page_title, "New Item")
     |> assign(:item, %Item{})
   end
 
-  defp apply_action(socket, :index, _params) do
+  defp apply_action(socket, :index) do
     socket
     |> assign(:page_title, "Listing Items")
     |> assign(:item, nil)
