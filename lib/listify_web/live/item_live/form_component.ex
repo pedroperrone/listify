@@ -2,15 +2,14 @@ defmodule ListifyWeb.ItemLive.FormComponent do
   use ListifyWeb, :live_component
 
   alias Listify.Shopping
+  alias Listify.Shopping.Item
 
   @impl true
-  def update(%{item: item} = assigns, socket) do
-    changeset = Shopping.change_item(item)
-
+  def update(assigns, socket) do
     {:ok,
      socket
      |> assign(assigns)
-     |> assign(:changeset, changeset)}
+     |> assign_clean_item()}
   end
 
   @impl true
@@ -24,32 +23,23 @@ defmodule ListifyWeb.ItemLive.FormComponent do
   end
 
   def handle_event("save", %{"item" => item_params}, socket) do
-    save_item(socket, socket.assigns.action, item_params)
-  end
-
-  defp save_item(socket, :edit, item_params) do
-    case Shopping.update_item(socket.assigns.item, item_params) do
-      {:ok, _item} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "Item updated successfully")
-         |> push_redirect(to: socket.assigns.return_to)}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, :changeset, changeset)}
-    end
-  end
-
-  defp save_item(socket, :new, item_params) do
     case Shopping.create_item(item_params) do
       {:ok, _item} ->
         {:noreply,
          socket
+         |> assign_clean_item()
          |> put_flash(:info, "Item created successfully")
-         |> push_redirect(to: socket.assigns.return_to)}
+         |> push_redirect(to: Routes.item_index_path(socket, :index))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
     end
+  end
+
+  defp assign_clean_item(socket) do
+    new_item = %Item{}
+    changeset = Shopping.change_item(new_item)
+
+    assign(socket, item: new_item, changeset: changeset)
   end
 end

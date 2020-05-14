@@ -1,13 +1,6 @@
 <h1>Listing Items</h1>
 
-<%= if @live_action in [:new, :edit] do %>
-  <%= live_modal @socket, ListifyWeb.ItemLive.FormComponent,
-    id: @item.id || :new,
-    title: @page_title,
-    action: @live_action,
-    item: @item,
-    return_to: Routes.item_index_path(@socket, :index) %>
-<% end %>
+<%= live_component @socket, ListifyWeb.ItemLive.FormComponent, id: :new %>
 
 <table>
   <thead>
@@ -31,5 +24,3 @@
     <% end %>
   </tbody>
 </table>
-
-<span><%= live_patch "New Item", to: Routes.item_index_path(@socket, :new) %></span>

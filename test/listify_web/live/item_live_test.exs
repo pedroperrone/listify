@@ -24,13 +24,7 @@ defmodule ListifyWeb.ItemLiveTest do
     test "saves new item", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
       invalid_attributes = %{name: ""}
-      valid_attributes = params_for(:item)
-
-      assert index_live
-             |> element("a", "New Item")
-             |> render_click() =~ "New Item"
-
-      assert_patch(index_live, Routes.item_index_path(conn, :new))
+      valid_attributes = %{name: "Some product"}
 
       assert index_live
              |> form("#item-form", item: invalid_attributes)
