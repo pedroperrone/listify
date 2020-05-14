@@ -18,6 +18,7 @@ defmodule ListifyWeb.Router do
     pipe_through :browser
 
     live "/", PageLive, :index
+    live "/items", ItemLive.Index, :index
   end
 
   # Other scopes may use custom stacks.
