@@ -4,6 +4,9 @@ defmodule Listify.MixProject do
   def project do
     [
       app: :listify,
+      dialyzer: [
+        plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
+      ],
       version: "0.1.0",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -26,6 +29,7 @@ defmodule Listify.MixProject do
 
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:prod), do: ["lib"]
+  defp elixirc_paths(:dev), do: ["lib", "test/support/factory.ex"]
   defp elixirc_paths(_), do: ["lib", "test/support"]
 
   # Specifies your project dependencies.
@@ -34,6 +38,7 @@ defmodule Listify.MixProject do
   defp deps do
     [
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:ecto_sql, "~> 3.4"},
       {:ex_machina, "~> 2.4", only: [:test, :dev]},
       {:floki, ">= 0.0.0", only: :test},
