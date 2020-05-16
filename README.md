@@ -1,3 +1,5 @@
+![Continuous Integration](https://github.com/pedroperrone/listify/workflows/Continuous%20Integration/badge.svg)
+
 # Listify
 
 To start your Phoenix server:

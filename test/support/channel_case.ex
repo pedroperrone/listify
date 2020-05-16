@@ -1,4 +1,6 @@
 defmodule ListifyWeb.ChannelCase do
+  alias Ecto.Adapters.SQL.Sandbox
+
   @moduledoc """
   This module defines the test case to be used by
   channel tests.
@@ -29,10 +31,10 @@ defmodule ListifyWeb.ChannelCase do
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Listify.Repo)
+    :ok = Sandbox.checkout(Listify.Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Listify.Repo, {:shared, self()})
+      Sandbox.mode(Listify.Repo, {:shared, self()})
     end
 
     :ok
