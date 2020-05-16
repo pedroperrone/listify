@@ -1,4 +1,6 @@
 defmodule Listify.DataCase do
+  alias Ecto.Adapters.SQL.Sandbox
+
   @moduledoc """
   This module defines the setup for tests requiring
   access to the application's data layer.
@@ -21,17 +23,16 @@ defmodule Listify.DataCase do
       alias Listify.Repo
 
       import Ecto
-      import Ecto.Changeset
-      import Ecto.Query
+      import Ecto.{Changeset, Query}
       import Listify.DataCase
     end
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Listify.Repo)
+    :ok = Sandbox.checkout(Listify.Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Listify.Repo, {:shared, self()})
+      Sandbox.mode(Listify.Repo, {:shared, self()})
     end
 
     :ok
