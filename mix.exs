@@ -33,6 +33,7 @@ defmodule Listify.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ecto_sql, "~> 3.4"},
       {:ex_machina, "~> 2.4", only: [:test, :dev]},
       {:floki, ">= 0.0.0", only: :test},
