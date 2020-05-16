@@ -14,8 +14,10 @@
   <tbody id="items">
     <%= for item <- @items do %>
       <tr id="item-<%= item.id %>">
+        <td>
+        <%= checkbox :item, :taken, checked: item.taken, phx_click: "toggle_taken", phx_value_id: item.id %>
+        </td>
         <td><%= item.name %></td>
-        <td><%= item.taken %></td>
 
         <td>
           <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: item.id, data: [confirm: "Are you sure?"] %></span>

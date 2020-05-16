@@ -56,4 +56,19 @@ defmodule ListifyWeb.ItemLiveTest do
              |> render_click() =~ "The item does not exist"
     end
   end
+
+  describe "Updates item" do
+    setup [:create_item]
+
+    test "toggles the taken value when checkbox is clicked", %{conn: conn, item: item} do
+      {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
+
+      index_live
+      |> element("#item_taken")
+      |> render_click()
+
+      {:ok, updated_item} = Shopping.get_item(item.id)
+      assert updated_item.taken != item.taken
+    end
+  end
 end
