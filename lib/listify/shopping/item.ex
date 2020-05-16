@@ -14,7 +14,7 @@ defmodule Listify.Shopping.Item do
   end
 
   @spec changeset(__MODULE__.t(), map()) :: Ecto.Changeset.t()
-  def changeset(item, attrs) do
+  def changeset(item = %__MODULE__{}, attrs) do
     item
     |> cast(attrs, @fields)
     |> validate_required(@required_fields)

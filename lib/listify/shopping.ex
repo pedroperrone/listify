@@ -1,6 +1,5 @@
 defmodule Listify.Shopping do
   alias Listify.Repo
-
   alias Listify.Shopping.Item
 
   @spec list_items() :: [Item.t()]
@@ -33,12 +32,12 @@ defmodule Listify.Shopping do
   end
 
   @spec delete_item(Item.t()) :: {:ok, Item.t()}
-  def delete_item(%Item{} = item) do
+  def delete_item(item = %Item{}) do
     Repo.delete(item)
   end
 
   @spec change_item(Item.t(), map()) :: Ecto.Changeset.t()
-  def change_item(%Item{} = item, attrs \\ %{}) do
+  def change_item(item = %Item{}, attrs \\ %{}) do
     Item.changeset(item, attrs)
   end
 end
