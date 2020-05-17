@@ -5,7 +5,7 @@
   phx_submit: "save" %>
 
   <%= label f, :name %>
-  <%= text_input f, :name %>
+  <%= text_input f, :name, placeholder: "Ex.: Toilet paper" %>
   <%= submit "Save", phx_disable_with: "Saving..." %>
 
   <%= error_tag f, :name %>
