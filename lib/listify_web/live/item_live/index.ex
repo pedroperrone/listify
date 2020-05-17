@@ -6,6 +6,8 @@ defmodule ListifyWeb.ItemLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket), do: Shopping.subscribe_to_items()
+
     socket =
       socket
       |> assign(items: Shopping.list_items(), phx_update: "prepend")
@@ -35,5 +37,15 @@ defmodule ListifyWeb.ItemLive.Index do
     else
       {:error, reason} -> {:noreply, put_flash(socket, :error, reason)}
     end
+  end
+
+  @impl true
+  def handle_info({:deleted_item, _}, socket) do
+    {:noreply, assign(socket, items: Shopping.list_items(), phx_update: "replace")}
+  end
+
+  @impl true
+  def handle_info({_, new_item}, socket) do
+    {:noreply, assign(socket, items: [new_item], phx_update: "prepend")}
   end
 end
