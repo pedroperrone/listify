@@ -3,9 +3,7 @@ defmodule Listify.Shopping do
   alias Listify.Shopping.Item
 
   @spec list_items() :: [Item.t()]
-  def list_items do
-    Repo.all(Item)
-  end
+  def list_items, do: Repo.all(Item)
 
   @spec get_item(binary()) :: {:ok, Item.t()} | {:error, binary()}
   def get_item(id) do
