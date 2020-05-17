@@ -15,7 +15,7 @@
     <%= for item <- @items do %>
       <tr id="item-<%= item.id %>">
         <td>
-        <%= checkbox :item, :taken, checked: item.taken, phx_click: "toggle_taken", phx_value_id: item.id %>
+        <%= checkbox :item, "taken-#{item.id}", checked: item.taken, phx_click: "toggle_taken", phx_value_id: item.id %>
         </td>
         <td><%= item.name %></td>
 

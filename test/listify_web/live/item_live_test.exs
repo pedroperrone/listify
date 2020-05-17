@@ -47,6 +47,19 @@ defmodule ListifyWeb.ItemLiveTest do
       refute has_element?(index_live, "#item-#{item.id}")
     end
 
+    test "sets phx_update to prepend if is not deleting", %{conn: conn, item: item} do
+      not_deleted_item_one = insert(:item)
+      not_deleted_item_two = insert(:item, name: "Not deleted and not updated")
+      {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
+
+      assert index_live |> element("#item-#{item.id} a", "Delete") |> render_click()
+      refute has_element?(index_live, "#item-#{item.id}")
+
+      assert index_live
+             |> element("#item_taken-#{not_deleted_item_one.id}")
+             |> render_click() =~ not_deleted_item_two.name
+    end
+
     test "failing to deletes item in listing", %{conn: conn, item: item} do
       {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
       {:ok, _} = Shopping.delete_item(item)
@@ -64,7 +77,7 @@ defmodule ListifyWeb.ItemLiveTest do
       {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
 
       index_live
-      |> element("#item_taken")
+      |> element("#item_taken-#{item.id}")
       |> render_click()
 
       {:ok, updated_item} = Shopping.get_item(item.id)
