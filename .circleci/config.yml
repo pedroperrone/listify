@@ -1,0 +1,98 @@
+version: 2.1
+
+defaults: &defaults
+  working_directory: ~/listify
+  docker:
+    - image: circleci/elixir:1.9.4
+    - image: postgres:latest
+      environment:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+
+require_build: &require_build
+  requires:
+    - build
+
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-build-cache-{{ checksum "mix.lock" }}
+            - v1-build-cache-
+      - run:
+          name: Build Application
+          command: |
+            mix local.rebar --force
+            mix local.hex --force
+            mix do deps.get, compile --warnings-as-errors --all-warnings
+      - save_cache:
+          key: v1-build-cache-{{ checksum "mix.lock" }}
+          paths:
+            - deps
+            - _build
+            - ~/.mix
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - listify
+            - .mix
+
+  code_analysis:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dialyzer-cache-{{ checksum "mix.lock" }}
+            - v1-dialyzer-cache-{{ .Branch }}-
+            - v1-dialyzer-cache-
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Run Formatter
+          command: mix format --check-formatted
+      - run:
+          name: Run Linter
+          command: mix credo
+      - run:
+          name: Run Dialyzer
+          command: mix dialyzer --plt
+      - save_cache:
+          key: v1-dialyzer-cache-{{ .Branch }}-{{ checksum "mix.lock" }}
+          paths:
+            - priv/plts
+
+  unit_tests:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - restore_cache:
+          keys:
+            - v1-tests-{{ .Branch }}-{{ checksum "mix.lock" }}
+            - v1-tests-{{ .Branch }}-
+            - v1-tests-
+      - run:
+          name: Wait for Database
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run:
+          name: Run Tests
+          command: mix test
+
+      - save_cache:
+          key: v1-tests-{{ .Branch }}-{{ checksum "mix.lock" }}
+          paths:
+            - _build
+
+workflows:
+  version: 2
+  continuous_integration:
+    jobs:
+      - build
+      - code_analysis:
+          <<: *require_build
+      - unit_tests:
+          <<: *require_build
