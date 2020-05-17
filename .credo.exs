@@ -69,7 +69,7 @@
         {Credo.Check.Refactor.Nesting, []},
         {Credo.Check.Refactor.PipeChainStart, []},
         {Credo.Check.Refactor.UnlessWithElse, false},
-        {Credo.Check.Refactor.VariableRebinding, []},
+        {Credo.Check.Refactor.VariableRebinding, false},
         {Credo.Check.Refactor.WithClauses, false},
         {Credo.Check.Warning.BoolOperationOnSameValues, []},
         {Credo.Check.Warning.ExpensiveEmptyEnumCheck, []},
