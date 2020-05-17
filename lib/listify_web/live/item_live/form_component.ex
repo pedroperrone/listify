@@ -1,8 +1,8 @@
 defmodule ListifyWeb.ItemLive.FormComponent do
   use ListifyWeb, :live_component
 
-  alias Listify.Shopping
   alias Listify.Shopping.Item
+  alias ListifyWeb.Shopping
 
   @impl true
   def update(assigns, socket) do

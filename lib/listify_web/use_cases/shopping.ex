@@ -23,5 +23,6 @@ defmodule ListifyWeb.Shopping do
     end
   end
 
-  def change_item(item = %Item{}, attrs), do: Shopping.change_item(item, attrs)
+  @spec change_item(Item.t(), map()) :: Ecto.Changeset.t()
+  def change_item(item = %Item{}, attrs \\ %{}), do: Shopping.change_item(item, attrs)
 end

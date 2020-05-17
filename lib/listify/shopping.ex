@@ -30,12 +30,8 @@ defmodule Listify.Shopping do
   end
 
   @spec delete_item(Item.t()) :: {:ok, Item.t()}
-  def delete_item(item = %Item{}) do
-    Repo.delete(item)
-  end
+  def delete_item(item = %Item{}), do: Repo.delete(item)
 
   @spec change_item(Item.t(), map()) :: Ecto.Changeset.t()
-  def change_item(item = %Item{}, attrs \\ %{}) do
-    Item.changeset(item, attrs)
-  end
+  def change_item(item = %Item{}, attrs \\ %{}), do: Item.changeset(item, attrs)
 end
