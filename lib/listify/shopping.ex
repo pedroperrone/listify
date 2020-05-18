@@ -1,9 +1,16 @@
 defmodule Listify.Shopping do
-  alias Listify.Repo
+  alias Listify.{Query, Repo}
   alias Listify.Shopping.Item
 
   @spec list_items() :: [Item.t()]
   def list_items, do: Repo.all(Item)
+
+  def list_filtered_and_sorted_items(filters, order) do
+    Item
+    |> Query.custom_filters(filters)
+    |> Query.order(:inserted_at, order)
+    |> Repo.all()
+  end
 
   @spec get_item(binary()) :: {:ok, Item.t()} | {:error, binary()}
   def get_item(id) do
