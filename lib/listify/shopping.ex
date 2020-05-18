@@ -5,6 +5,7 @@ defmodule Listify.Shopping do
   @spec list_items() :: [Item.t()]
   def list_items, do: Repo.all(Item)
 
+  @spec list_filtered_and_sorted_items(map(), :asc | :desc) :: [Item.t()]
   def list_filtered_and_sorted_items(filters, order) do
     Item
     |> Query.custom_filters(filters)

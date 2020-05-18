@@ -1,4 +1,4 @@
-defmodule ListifyWeb.Shopping do
+defmodule ListifyWeb.ShoppingUseCases do
   alias Ecto.Changeset
   alias Listify.Shopping
   alias Listify.Shopping.Item

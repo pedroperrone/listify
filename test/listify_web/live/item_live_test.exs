@@ -5,7 +5,7 @@ defmodule ListifyWeb.ItemLiveTest do
   import Phoenix.LiveViewTest
 
   alias Listify.Shopping
-  alias ListifyWeb.Shopping, as: ShoppingUseCase
+  alias ListifyWeb.ShoppingUseCases
 
   defp create_item(_) do
     item = insert(:item)
@@ -43,7 +43,7 @@ defmodule ListifyWeb.ItemLiveTest do
 
     test "adds new items to the list when it is broadcasted", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
-      ShoppingUseCase.create_item(%{name: "New item"})
+      ShoppingUseCases.create_item(%{name: "New item"})
 
       assert render(index_live) =~ "New item"
     end
@@ -57,7 +57,7 @@ defmodule ListifyWeb.ItemLiveTest do
 
     test "removes items when deletion is broadcasted", %{conn: conn, item: item} do
       {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
-      ShoppingUseCase.delete_item(item.id)
+      ShoppingUseCases.delete_item(item.id)
 
       refute has_element?(index_live, "#item-#{item.id}")
     end
@@ -102,7 +102,7 @@ defmodule ListifyWeb.ItemLiveTest do
     test "updates the item when its update is broadcasted", %{conn: conn, item: item} do
       {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
 
-      ShoppingUseCase.update_item(item.id, %{name: "New name"})
+      ShoppingUseCases.update_item(item.id, %{name: "New name"})
 
       assert has_element?(index_live, "#item-#{item.id}")
       assert render(index_live) =~ "New name"
