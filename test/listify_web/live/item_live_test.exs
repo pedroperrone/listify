@@ -1,5 +1,5 @@
 defmodule ListifyWeb.ItemLiveTest do
-  use ListifyWeb.ConnCase
+  use ListifyWeb.ConnCase, async: true
 
   import Listify.Factory
   import Phoenix.LiveViewTest
@@ -8,18 +8,70 @@ defmodule ListifyWeb.ItemLiveTest do
   alias ListifyWeb.ShoppingUseCases
 
   defp create_item(_) do
-    item = insert(:item)
+    item = insert(:item, inserted_at: Timex.shift(DateTime.utc_now(), minutes: -1))
     %{item: item}
   end
 
   describe "Index" do
     setup [:create_item]
 
-    test "lists all items", %{conn: conn, item: item} do
+    test "lists all items sorted by most recent first by default", %{conn: conn, item: item} do
+      taken_item =
+        insert(:item,
+          taken: true,
+          inserted_at: Timex.shift(DateTime.utc_now(), minutes: 1),
+          name: "Taken item"
+        )
+
       {:ok, _index_live, html} = live(conn, Routes.item_index_path(conn, :index))
 
       assert html =~ "Listing Items"
+      assert_html_includes_strings_in_order(html, [taken_item.name, item.name])
+    end
+
+    test "lists all items sorted by least recent if param is sent", %{conn: conn, item: item} do
+      taken_item =
+        insert(:item,
+          taken: true,
+          inserted_at: Timex.shift(DateTime.utc_now(), minutes: 1),
+          name: "Taken item"
+        )
+
+      {:ok, _index_live, html} =
+        live(conn, Routes.item_index_path(conn, :index, %{"sort" => "asc"}))
+
+      assert html =~ "Listing Items"
+      assert_html_includes_strings_in_order(html, [item.name, taken_item.name])
+    end
+
+    test "lists only taken items if the filter param is sent", %{conn: conn, item: item} do
+      taken_item =
+        insert(:item,
+          taken: true,
+          inserted_at: Timex.shift(DateTime.utc_now(), minutes: 1),
+          name: "Taken item"
+        )
+
+      {:ok, _index_live, html} =
+        live(conn, Routes.item_index_path(conn, :index, %{"taken" => "true"}))
+
+      assert html =~ taken_item.name
+      refute html =~ item.name
+    end
+
+    test "lists only not taken items if the filter param is sent", %{conn: conn, item: item} do
+      taken_item =
+        insert(:item,
+          taken: true,
+          inserted_at: Timex.shift(DateTime.utc_now(), minutes: 1),
+          name: "Taken item"
+        )
+
+      {:ok, _index_live, html} =
+        live(conn, Routes.item_index_path(conn, :index, %{"taken" => "false"}))
+
       assert html =~ item.name
+      refute html =~ taken_item.name
     end
 
     test "saves new item", %{conn: conn} do
@@ -47,6 +99,35 @@ defmodule ListifyWeb.ItemLiveTest do
 
       assert render(index_live) =~ "New item"
     end
+  end
+
+  describe "Updates item" do
+    setup [:create_item]
+
+    test "toggles the taken value when checkbox is clicked", %{conn: conn, item: item} do
+      {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
+
+      index_live
+      |> element("#item_taken-#{item.id}")
+      |> render_click()
+
+      {:ok, updated_item} = Shopping.get_item(item.id)
+      assert updated_item.taken != item.taken
+    end
+
+    test "updates the item when its update is broadcasted", %{conn: conn, item: item} do
+      {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
+
+      ShoppingUseCases.update_item(item.id, %{name: "New name"})
+
+      assert has_element?(index_live, "#item-#{item.id}")
+      assert render(index_live) =~ "New name"
+      refute render(index_live) =~ item.name
+    end
+  end
+
+  describe "Deletes item" do
+    setup [:create_item]
 
     test "deletes item in listing", %{conn: conn, item: item} do
       {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
@@ -85,28 +166,12 @@ defmodule ListifyWeb.ItemLiveTest do
     end
   end
 
-  describe "Updates item" do
-    setup [:create_item]
+  def assert_html_includes_strings_in_order(html, strings) do
+    regex =
+      strings
+      |> Enum.join(".*")
+      |> Regex.compile!()
 
-    test "toggles the taken value when checkbox is clicked", %{conn: conn, item: item} do
-      {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
-
-      index_live
-      |> element("#item_taken-#{item.id}")
-      |> render_click()
-
-      {:ok, updated_item} = Shopping.get_item(item.id)
-      assert updated_item.taken != item.taken
-    end
-
-    test "updates the item when its update is broadcasted", %{conn: conn, item: item} do
-      {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
-
-      ShoppingUseCases.update_item(item.id, %{name: "New name"})
-
-      assert has_element?(index_live, "#item-#{item.id}")
-      assert render(index_live) =~ "New name"
-      refute render(index_live) =~ item.name
-    end
+    assert html =~ regex
   end
 end

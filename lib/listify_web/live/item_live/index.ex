@@ -5,12 +5,12 @@ defmodule ListifyWeb.ItemLive.Index do
   alias ListifyWeb.ShoppingUseCases
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     if connected?(socket), do: ShoppingUseCases.subscribe_to_items()
 
     socket =
       socket
-      |> assign(items: ShoppingUseCases.list_items(), phx_update: "prepend")
+      |> assign(items: fetch_items(params), phx_update: "prepend", params: params)
       |> assign(temporary_assigns: [items: [], phx_update: "prepend"])
 
     {:ok, socket}
@@ -41,11 +41,13 @@ defmodule ListifyWeb.ItemLive.Index do
 
   @impl true
   def handle_info({:deleted_item, _}, socket) do
-    {:noreply, assign(socket, items: ShoppingUseCases.list_items(), phx_update: "replace")}
+    {:noreply, assign(socket, items: fetch_items(socket.assigns.params), phx_update: "replace")}
   end
 
   @impl true
   def handle_info({_, new_item}, socket) do
     {:noreply, assign(socket, items: [new_item], phx_update: "prepend")}
   end
+
+  defp fetch_items(params), do: ShoppingUseCases.list_filtered_and_sorted_items(params)
 end

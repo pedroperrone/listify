@@ -5,7 +5,7 @@ defmodule Listify.Factory do
 
   def item_factory do
     %Item{
-      name: "Jane Smith",
+      name: "Shampoo",
       taken: false
     }
   end
