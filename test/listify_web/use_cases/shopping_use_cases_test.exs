@@ -15,6 +15,66 @@ defmodule ListifyWeb.ShoppingUseCasesTest do
     end
   end
 
+  describe "list_filtered_and_sorted_items/1" do
+    test "filters items by taken when the filter's value is true" do
+      taken_item = insert(:item, taken: true)
+      _not_taken_item = insert(:item, taken: false)
+      params = %{"taken" => "true"}
+
+      assert [taken_item] == ShoppingUseCases.list_filtered_and_sorted_items(params)
+    end
+
+    test "filters items by taken when the filter's value is false" do
+      _taken_item = insert(:item, taken: true)
+      not_taken_item = insert(:item, taken: false)
+      params = %{"taken" => "false"}
+
+      assert [not_taken_item] == ShoppingUseCases.list_filtered_and_sorted_items(params)
+    end
+
+    test "does not filter items when the params are empty" do
+      taken_item = insert(:item, taken: true)
+      not_taken_item = insert(:item, taken: false)
+      params = %{}
+
+      assert MapSet.new([not_taken_item, taken_item]) ==
+               MapSet.new(ShoppingUseCases.list_filtered_and_sorted_items(params))
+    end
+
+    test "does not filter items when the filters are not allowed" do
+      taken_item = insert(:item, taken: true, name: "Taken")
+      not_taken_item = insert(:item, taken: false, name: "Not taken")
+      params = %{"name" => "Taken"}
+
+      assert MapSet.new([not_taken_item, taken_item]) ==
+               MapSet.new(ShoppingUseCases.list_filtered_and_sorted_items(params))
+    end
+
+    test "sorts the items ascendantly when the sort param is asc" do
+      oldest_item = insert(:item, inserted_at: Timex.shift(DateTime.utc_now(), minutes: -1))
+      newest_item = insert(:item, inserted_at: Timex.shift(DateTime.utc_now(), minutes: 1))
+      params = %{"sort" => "asc"}
+
+      assert [oldest_item, newest_item] == ShoppingUseCases.list_filtered_and_sorted_items(params)
+    end
+
+    test "sorts the items descendantly when the sort param is desc" do
+      oldest_item = insert(:item, inserted_at: Timex.shift(DateTime.utc_now(), minutes: -1))
+      newest_item = insert(:item, inserted_at: Timex.shift(DateTime.utc_now(), minutes: 1))
+      params = %{"sort" => "desc"}
+
+      assert [newest_item, oldest_item] == ShoppingUseCases.list_filtered_and_sorted_items(params)
+    end
+
+    test "sorts the items descendantly when there is no sort param" do
+      oldest_item = insert(:item, inserted_at: Timex.shift(DateTime.utc_now(), minutes: -1))
+      newest_item = insert(:item, inserted_at: Timex.shift(DateTime.utc_now(), minutes: 1))
+      params = %{}
+
+      assert [newest_item, oldest_item] == ShoppingUseCases.list_filtered_and_sorted_items(params)
+    end
+  end
+
   describe "create_items/1" do
     test "creates an item when the parameters are valid" do
       attrs = params_for(:item)

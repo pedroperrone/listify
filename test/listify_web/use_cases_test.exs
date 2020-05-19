@@ -18,4 +18,19 @@ defmodule ListifyWeb.UseCasesTest do
       assert %{} == UseCases.allowed_filters(filters, allowed_values)
     end
   end
+
+  describe "cast_sorting_order/2" do
+    test "returns :desc when value is desc" do
+      assert :desc == UseCases.cast_sorting_order("desc", :desc)
+    end
+
+    test "returns :asc when value is asc" do
+      assert :asc == UseCases.cast_sorting_order("asc", :desc)
+    end
+
+    test "returns default when the value is neither asc or desc" do
+      assert :desc == UseCases.cast_sorting_order("invalid", :desc)
+      assert :asc == UseCases.cast_sorting_order("invalid", :asc)
+    end
+  end
 end
