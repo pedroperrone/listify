@@ -2,6 +2,18 @@
 
 <%= live_component @socket, ListifyWeb.ItemLive.FormComponent, id: :new %>
 
+<%= f = form_for :filters, "#",
+  id: "item-filters",
+  phx_change: "apply_filter" %>
+
+  <%= label f, :filter_by %>
+  <%= select f, :taken, [[key: "Taken", value: "true"],
+                         [key: "Not taken", value: "false"]],
+                         prompt: "None" %>
+  <%= label f, :sort %>
+  <%= select f, :sort, [{"Most recent", "desc"}, {"Least recent", "asc"}] %>
+</form>
+
 <table>
   <thead>
     <tr>

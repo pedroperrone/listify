@@ -145,6 +145,87 @@ defmodule ListifyWeb.ItemLiveTest do
 
       refute render(index_live) =~ "New item"
     end
+
+    test "patches the view and filter only taken items when the filter changes to taken", %{
+      conn: conn,
+      item: not_taken_item
+    } do
+      taken_item = insert(:item, taken: true, name: "Taken item")
+
+      {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
+
+      rendered_view =
+        index_live
+        |> element("#item-filters")
+        |> render_change(%{filters: %{taken: true}})
+
+      assert rendered_view =~ taken_item.name
+      refute rendered_view =~ not_taken_item.name
+
+      assert_patch(index_live, "/items?sort=desc&taken=true")
+    end
+
+    test "patches the view and filter only not taken items when the filter changes to not taken",
+         %{
+           conn: conn,
+           item: not_taken_item
+         } do
+      taken_item = insert(:item, taken: true, name: "Taken item")
+
+      {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
+
+      rendered_view =
+        index_live
+        |> element("#item-filters")
+        |> render_change(%{filters: %{taken: false}})
+
+      refute rendered_view =~ taken_item.name
+      assert rendered_view =~ not_taken_item.name
+
+      assert_patch(index_live, "/items?sort=desc&taken=false")
+    end
+
+    test "patches the view and sort desc when the filter changes", %{
+      conn: conn,
+      item: not_taken_item
+    } do
+      taken_item =
+        insert(:item,
+          taken: true,
+          name: "Taken item",
+          inserted_at: Timex.shift(DateTime.utc_now(), minutes: 5)
+        )
+
+      {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
+
+      index_live
+      |> element("#item-filters")
+      |> render_change(%{filters: %{sort: "desc"}})
+      |> assert_html_includes_strings_in_order([taken_item.name, not_taken_item.name])
+
+      assert_patch(index_live, "/items?sort=desc&taken=")
+    end
+
+    test "patches the view and sort asc when the filter changes", %{
+      conn: conn,
+      item: not_taken_item
+    } do
+      taken_item =
+        insert(:item,
+          taken: true,
+          name: "Taken item",
+          inserted_at: Timex.shift(DateTime.utc_now(), minutes: 5)
+        )
+
+      {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
+
+      index_live
+      |> element("#item-filters")
+      |> render_change(%{filters: %{sort: "asc"}})
+      |> assert_html_includes_strings_in_order([not_taken_item.name, taken_item.name])
+
+      assert_patch(index_live, "/items?sort=asc&taken=")
+    end
   end
 
   describe "Updates item" do

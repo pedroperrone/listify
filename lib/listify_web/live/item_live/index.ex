@@ -19,6 +19,18 @@ defmodule ListifyWeb.ItemLive.Index do
   end
 
   @impl true
+  def handle_params(params, _uri, socket) do
+    socket = assign(socket, items: fetch_items(params), phx_update: "replace", params: params)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("apply_filter", %{"filters" => filters}, socket) do
+    {:noreply, push_patch(socket, to: Routes.item_index_path(socket, :index, filters))}
+  end
+
+  @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     with {:ok, item = %Item{}} <- ShoppingUseCases.delete_item(id) do
       {:noreply,
