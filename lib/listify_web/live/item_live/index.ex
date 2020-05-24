@@ -64,13 +64,10 @@ defmodule ListifyWeb.ItemLive.Index do
         socket = %{assigns: %{params: %{"taken" => taken_filter}}}
       )
       when taken_filter in @valid_taken_filters do
-    cond do
-      Atom.to_string(taken_value) == taken_filter ->
-        {:noreply, assign(socket, items: [new_item], phx_update: "prepend")}
-
-      true ->
-        {:noreply,
-         assign(socket, items: fetch_items(socket.assigns.params), phx_update: "replace")}
+    if Atom.to_string(taken_value) == taken_filter do
+      {:noreply, assign(socket, items: [new_item], phx_update: "prepend")}
+    else
+      {:noreply, assign(socket, items: fetch_items(socket.assigns.params), phx_update: "replace")}
     end
   end
 
