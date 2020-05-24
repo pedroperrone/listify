@@ -4,6 +4,8 @@ defmodule ListifyWeb.ItemLive.Index do
   alias Listify.Shopping.Item
   alias ListifyWeb.ShoppingUseCases
 
+  @valid_taken_filters ["true", "false"]
+
   @impl true
   def mount(params, _session, socket) do
     if connected?(socket), do: ShoppingUseCases.subscribe_to_items()
@@ -42,6 +44,22 @@ defmodule ListifyWeb.ItemLive.Index do
   @impl true
   def handle_info({:deleted_item, _}, socket) do
     {:noreply, assign(socket, items: fetch_items(socket.assigns.params), phx_update: "replace")}
+  end
+
+  @impl true
+  def handle_info(
+        {_, new_item = %Item{taken: taken_value}},
+        socket = %{assigns: %{params: %{"taken" => taken_filter}}}
+      )
+      when taken_filter in @valid_taken_filters do
+    cond do
+      Atom.to_string(taken_value) == taken_filter ->
+        {:noreply, assign(socket, items: [new_item], phx_update: "prepend")}
+
+      true ->
+        {:noreply,
+         assign(socket, items: fetch_items(socket.assigns.params), phx_update: "replace")}
+    end
   end
 
   @impl true

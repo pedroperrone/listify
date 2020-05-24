@@ -93,11 +93,57 @@ defmodule ListifyWeb.ItemLiveTest do
       assert html =~ valid_attributes[:name]
     end
 
-    test "adds new items to the list when it is broadcasted", %{conn: conn} do
+    test "adds new items to the list when it is broadcasted and there are no filters", %{
+      conn: conn
+    } do
       {:ok, index_live, _html} = live(conn, Routes.item_index_path(conn, :index))
       ShoppingUseCases.create_item(%{name: "New item"})
 
       assert render(index_live) =~ "New item"
+    end
+
+    test "adds new items to the list when it is broadcasted, the item is not taken and the filter " <>
+           "is not taken",
+         %{conn: conn} do
+      {:ok, index_live, _html} =
+        live(conn, Routes.item_index_path(conn, :index, %{"taken" => "false"}))
+
+      ShoppingUseCases.create_item(%{name: "New item"})
+
+      assert render(index_live) =~ "New item"
+    end
+
+    test "does not add new items to the list when it is broadcasted, the item is taken and the " <>
+           "filter is not taken",
+         %{conn: conn} do
+      {:ok, index_live, _html} =
+        live(conn, Routes.item_index_path(conn, :index, %{"taken" => "false"}))
+
+      ShoppingUseCases.create_item(%{name: "New item", taken: true})
+
+      refute render(index_live) =~ "New item"
+    end
+
+    test "adds new items to the list when it is broadcasted, the item is taken and the filter " <>
+           "is taken",
+         %{conn: conn} do
+      {:ok, index_live, _html} =
+        live(conn, Routes.item_index_path(conn, :index, %{"taken" => "true"}))
+
+      ShoppingUseCases.create_item(%{name: "New item", taken: true})
+
+      assert render(index_live) =~ "New item"
+    end
+
+    test "does not add new items to the list when it is broadcasted, the item is not taken and the " <>
+           "filter is taken",
+         %{conn: conn} do
+      {:ok, index_live, _html} =
+        live(conn, Routes.item_index_path(conn, :index, %{"taken" => "true"}))
+
+      ShoppingUseCases.create_item(%{name: "New item", taken: false})
+
+      refute render(index_live) =~ "New item"
     end
   end
 
@@ -123,6 +169,58 @@ defmodule ListifyWeb.ItemLiveTest do
       assert has_element?(index_live, "#item-#{item.id}")
       assert render(index_live) =~ "New name"
       refute render(index_live) =~ item.name
+    end
+
+    test "adds the item to the list when it filters taken items and an item is updated to taken",
+         %{conn: conn} do
+      not_taken_item = insert(:item, taken: false, name: "Not taken")
+
+      {:ok, index_live, _html} =
+        live(conn, Routes.item_index_path(conn, :index, %{"taken" => "true"}))
+
+      refute has_element?(index_live, "item-#{not_taken_item.id}")
+
+      {:ok, _} = ShoppingUseCases.update_item(not_taken_item.id, %{taken: true})
+      assert render(index_live) =~ not_taken_item.name
+    end
+
+    test "removes the item from the list when it is updated to not taken and the filter is taken",
+         %{conn: conn} do
+      taken_item = insert(:item, taken: true, name: "Taken item")
+
+      {:ok, index_live, _html} =
+        live(conn, Routes.item_index_path(conn, :index, %{"taken" => "true"}))
+
+      assert render(index_live) =~ taken_item.name
+
+      {:ok, _} = ShoppingUseCases.update_item(taken_item.id, %{taken: false})
+      refute render(index_live) =~ taken_item.name
+    end
+
+    test "adds the item to the list when it filters not taken items and an item is updated to not taken",
+         %{conn: conn} do
+      taken_item = insert(:item, taken: true, name: "Taken item")
+
+      {:ok, index_live, _html} =
+        live(conn, Routes.item_index_path(conn, :index, %{"taken" => "false"}))
+
+      refute has_element?(index_live, "item-#{taken_item.id}")
+
+      {:ok, _} = ShoppingUseCases.update_item(taken_item.id, %{taken: false})
+      assert render(index_live) =~ taken_item.name
+    end
+
+    test "removes the item from the list when it is updated to taken and the filter is not taken",
+         %{conn: conn} do
+      not_taken_item = insert(:item, taken: false, name: "Not taken item")
+
+      {:ok, index_live, _html} =
+        live(conn, Routes.item_index_path(conn, :index, %{"taken" => "false"}))
+
+      assert render(index_live) =~ not_taken_item.name
+
+      {:ok, _} = ShoppingUseCases.update_item(not_taken_item.id, %{taken: true})
+      refute render(index_live) =~ not_taken_item.name
     end
   end
 
