@@ -1,14 +1,28 @@
-defmodule ListifyWeb.Shopping do
+defmodule ListifyWeb.ShoppingUseCases do
   alias Ecto.Changeset
   alias Listify.Shopping
   alias Listify.Shopping.Item
   alias Phoenix.PubSub
+  import ListifyWeb.UseCases
 
   @pub_sub_name Listify.PubSub
   @items_topic "items"
+  @allowed_filters %{"taken" => ["true", "false"]}
 
   @spec list_items() :: [Item.t()]
   def list_items, do: Shopping.list_items()
+
+  @spec list_filtered_and_sorted_items(map) :: [Item.t()]
+  def list_filtered_and_sorted_items(params) do
+    sorting_order =
+      params
+      |> Map.get("sort")
+      |> cast_sorting_order(:desc)
+
+    params
+    |> allowed_filters(@allowed_filters)
+    |> Shopping.list_filtered_and_sorted_items(sorting_order)
+  end
 
   @spec create_item(map()) :: {:ok, Item.t()} | {:error, Changeset.t()}
   def create_item(attrs) do

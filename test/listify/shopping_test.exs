@@ -14,6 +14,38 @@ defmodule Listify.ShoppingTest do
     end
   end
 
+  describe "list_filtered_and_sorted_items/2" do
+    test "should apply the filters correctly" do
+      taken_item_one = insert(:item, taken: true, inserted_at: DateTime.utc_now())
+
+      taken_item_two =
+        insert(:item, taken: true, inserted_at: Timex.shift(DateTime.utc_now(), minutes: 1))
+
+      taken_item_three =
+        insert(:item, taken: true, inserted_at: Timex.shift(DateTime.utc_now(), minutes: 2))
+
+      _not_taken_item = insert(:item, taken: false)
+
+      fetched_items = Shopping.list_filtered_and_sorted_items(%{"taken" => true}, :desc)
+
+      assert fetched_items == [taken_item_three, taken_item_two, taken_item_one]
+    end
+
+    test "should sort ascendantly when the param is :asc" do
+      taken_item_one = insert(:item, taken: true, inserted_at: DateTime.utc_now())
+
+      taken_item_two =
+        insert(:item, taken: true, inserted_at: Timex.shift(DateTime.utc_now(), minutes: 1))
+
+      taken_item_three =
+        insert(:item, taken: true, inserted_at: Timex.shift(DateTime.utc_now(), minutes: 2))
+
+      fetched_items = Shopping.list_filtered_and_sorted_items(%{"taken" => true}, :asc)
+
+      assert fetched_items == [taken_item_one, taken_item_two, taken_item_three]
+    end
+  end
+
   describe "get_item/1" do
     test "returns the item when it exists" do
       item = insert(:item)
