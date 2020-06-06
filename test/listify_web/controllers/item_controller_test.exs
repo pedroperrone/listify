@@ -103,7 +103,6 @@ defmodule ListifyWeb.ItemControllerTest do
     test "renders unprocessable entity when the params are invalid", %{conn: conn} do
       item = insert(:item)
       params = %{"name" => nil}
-      ShoppingUseCases.subscribe_to_items()
 
       response =
         conn
@@ -117,6 +116,31 @@ defmodule ListifyWeb.ItemControllerTest do
       response =
         conn
         |> patch(Routes.item_path(conn, :update, UUID.generate()), %{})
+        |> json_response(:not_found)
+
+      assert response == %{"errors" => %{"detail" => "The item does not exist"}}
+    end
+  end
+
+  describe "DELETE delete" do
+    test "delete the item when it exists", %{conn: conn} do
+      item = insert(:item)
+      ShoppingUseCases.subscribe_to_items()
+
+      conn
+      |> delete(Routes.item_path(conn, :delete, item.id))
+      |> response(:no_content)
+
+      assert Item |> Repo.get(item.id) |> is_nil()
+
+      item_id = item.id
+      assert_received {:deleted_item, %Item{id: ^item_id}}
+    end
+
+    test "renders not found when the item does not exist", %{conn: conn} do
+      response =
+        conn
+        |> delete(Routes.item_path(conn, :delete, UUID.generate()))
         |> json_response(:not_found)
 
       assert response == %{"errors" => %{"detail" => "The item does not exist"}}

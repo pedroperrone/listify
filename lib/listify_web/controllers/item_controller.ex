@@ -28,4 +28,10 @@ defmodule ListifyWeb.ItemController do
       |> render("show.json", %{item: item})
     end
   end
+
+  def delete(conn, %{"id" => item_id}) do
+    with {:ok, _} <- ShoppingUseCases.delete_item(item_id) do
+      send_resp(conn, :no_content, "")
+    end
+  end
 end
