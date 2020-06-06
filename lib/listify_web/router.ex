@@ -22,7 +22,7 @@ defmodule ListifyWeb.Router do
   end
 
   scope "/api", ListifyWeb do
-    resources "/items", ItemController, only: [:index]
+    resources "/items", ItemController, only: [:index, :create]
   end
 
   # Other scopes may use custom stacks.

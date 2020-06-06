@@ -3,6 +3,10 @@ defmodule ListifyWeb.ItemControllerTest do
 
   import Listify.Factory
 
+  alias Listify.Repo
+  alias Listify.Shopping.Item
+  alias ListifyWeb.ShoppingUseCases
+
   describe "GET index" do
     test "lists all items sorted desc when no filters are given", %{conn: conn} do
       first_item =
@@ -50,6 +54,31 @@ defmodule ListifyWeb.ItemControllerTest do
       fetched_item_ids = response |> Enum.map(& &1["id"])
 
       assert expected_item_ids == fetched_item_ids
+    end
+  end
+
+  describe "POST create" do
+    test "renders the new item and broadcasts its creation when params are valid", %{conn: conn} do
+      params = string_params_for(:item)
+      ShoppingUseCases.subscribe_to_items()
+
+      conn
+      |> post(Routes.item_path(conn, :create), params)
+      |> json_response(:created)
+
+      [item] = Repo.all(Item)
+      assert_received {:new_item, ^item}
+    end
+
+    test "renders unprocessable entity when the params are invalid", %{conn: conn} do
+      params = string_params_for(:item, name: nil)
+
+      response =
+        conn
+        |> post(Routes.item_path(conn, :create), params)
+        |> json_response(:unprocessable_entity)
+
+      assert response == %{"errors" => %{"name" => ["can't be blank"]}}
     end
   end
 end

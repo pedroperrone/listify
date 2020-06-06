@@ -5,6 +5,10 @@ defmodule ListifyWeb.ItemView do
     render_many(items, __MODULE__, "item.json")
   end
 
+  def render("show.json", %{item: item}) do
+    render_one(item, __MODULE__, "item.json")
+  end
+
   def render("item.json", %{item: item}) do
     %{
       id: item.id,
