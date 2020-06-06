@@ -13,4 +13,8 @@ defmodule ListifyWeb.ErrorView do
   def template_not_found(template, _assigns) do
     Phoenix.Controller.status_message_from_template(template)
   end
+
+  def render("422.json", %{errors: errors}), do: %{errors: errors}
+
+  def render("404.json", %{message: message}), do: %{errors: %{detail: message}}
 end
