@@ -21,6 +21,10 @@ defmodule ListifyWeb.Router do
     live "/items", ItemLive.Index, :index
   end
 
+  scope "/api", ListifyWeb do
+    resources "/items", ItemController, only: [:index]
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", ListifyWeb do
   #   pipe_through :api
