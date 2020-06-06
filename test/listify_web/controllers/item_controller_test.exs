@@ -3,6 +3,7 @@ defmodule ListifyWeb.ItemControllerTest do
 
   import Listify.Factory
 
+  alias Ecto.UUID
   alias Listify.Repo
   alias Listify.Shopping.Item
   alias ListifyWeb.ShoppingUseCases
@@ -79,6 +80,46 @@ defmodule ListifyWeb.ItemControllerTest do
         |> json_response(:unprocessable_entity)
 
       assert response == %{"errors" => %{"name" => ["can't be blank"]}}
+    end
+  end
+
+  describe "PATCH update" do
+    test "renders the updated item and broadcasts its change when params are valid", %{conn: conn} do
+      item = insert(:item)
+      params = %{"name" => "Name after update"}
+      ShoppingUseCases.subscribe_to_items()
+
+      response =
+        conn
+        |> patch(Routes.item_path(conn, :update, item.id), params)
+        |> json_response(:ok)
+
+      item = Repo.get(Item, item.id)
+      assert response["name"] == "Name after update"
+      assert item.name == "Name after update"
+      assert_received {:updated_item, ^item}
+    end
+
+    test "renders unprocessable entity when the params are invalid", %{conn: conn} do
+      item = insert(:item)
+      params = %{"name" => nil}
+      ShoppingUseCases.subscribe_to_items()
+
+      response =
+        conn
+        |> patch(Routes.item_path(conn, :update, item.id), params)
+        |> json_response(:unprocessable_entity)
+
+      assert response == %{"errors" => %{"name" => ["can't be blank"]}}
+    end
+
+    test "renders not found when the item does not exist", %{conn: conn} do
+      response =
+        conn
+        |> patch(Routes.item_path(conn, :update, UUID.generate()), %{})
+        |> json_response(:not_found)
+
+      assert response == %{"errors" => %{"detail" => "The item does not exist"}}
     end
   end
 end

@@ -4,7 +4,9 @@ defmodule ListifyWeb.FallbackController do
   alias Ecto.Changeset
   alias ListifyWeb.ErrorView
 
-  def call(conn, {:error, message = "Resource not found"}) do
+  @not_found_messages ["The item does not exist"]
+
+  def call(conn, {:error, message}) when message in @not_found_messages do
     conn
     |> put_status(:not_found)
     |> put_view(ErrorView)

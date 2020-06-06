@@ -15,4 +15,6 @@ defmodule ListifyWeb.ErrorView do
   end
 
   def render("422.json", %{errors: errors}), do: %{errors: errors}
+
+  def render("404.json", %{message: message}), do: %{errors: %{detail: message}}
 end

@@ -20,4 +20,12 @@ defmodule ListifyWeb.ItemController do
       |> render("show.json", %{item: item})
     end
   end
+
+  def update(conn, params = %{"id" => item_id}) do
+    with {:ok, item} <- ShoppingUseCases.update_item(item_id, params) do
+      conn
+      |> put_status(:ok)
+      |> render("show.json", %{item: item})
+    end
+  end
 end
