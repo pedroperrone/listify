@@ -22,6 +22,8 @@ defmodule ListifyWeb.Router do
   end
 
   scope "/api", ListifyWeb do
+    pipe_through :api
+
     resources "/items", ItemController, only: [:index, :create, :update, :delete]
   end
 
