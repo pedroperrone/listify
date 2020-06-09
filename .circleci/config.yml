@@ -3,7 +3,7 @@ version: 2.1
 defaults: &defaults
   working_directory: ~/listify
   docker:
-    - image: circleci/elixir:1.9.4
+    - image: circleci/elixir:1.10.1
     - image: postgres:latest
       environment:
           POSTGRES_USER: postgres

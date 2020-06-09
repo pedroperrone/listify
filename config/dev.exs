@@ -2,12 +2,12 @@ use Mix.Config
 
 # Configure your database
 config :listify, Listify.Repo,
-  username: "postgres",
-  password: "postgres",
-  database: "listify_dev",
+  username: System.get_env("DATABASE_USERNAME", "postgres"),
+  password: System.get_env("DATABASE_PASSWORD", "postgres"),
+  database: System.get_env("DATABASE_NAME", "listify_dev"),
   hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+  pool_size: String.to_integer(System.get_env("DATABASE_POOL_SIZE", "10"))
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
